@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <title>oAuth</title>
+        <script type="text/javascript" src="/desktop/assets/js/jquery.min.js"></script>
+        <script>
+            // Read a page's GET URL variables and return them as an associative array.
+            function getUrlVars() {
+                ///////////////////// FILL OUT THIS SECTION /////////////////////
+
+                var finesseDomain = "didatavoip.local"; // Fill in your Finesse domain
+                var redirectURI = "https://finesse2018.herokuapp.com/"; // Fill in the same value as the `Redirect URI(s)` field of the Spark Integration Details page
+                var OAuthClientId = "ÁC339af0fa4fe3b8868b104e6666d55a13e5feaeaae5041ac356b42b63f50a5158"; // Fill in the OAuth Client Id from the Spark Integration Details page
+                var OAuthClientSecret = "092935399d79c78500b23ed5fafa0a59956b29623b8c323ab4bb709202d46498"; // Fill in the OAuth Client Secret from the Spark Integration Details page
+                
+                ////////////////////////////////////////////////////////////////
+
+                var vars = [], hash;
+                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for(var i = 0; i < hashes.length; i++)
+                {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                    if (hash[0] == "code") {
+                        ////alert(hash[0] + " = " + hash[1]);
+                        $.ajax({
+                            url: 'https://api.ciscospark.com/v1/access_token',
+                            type: "post",
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            data: "grant_type=authorization_code&client_id=" + OAuthClientId + "&client_secret=" + OAuthClientSecret + "&redirect_uri=" + encodeURI(redirectURI) + "&code=" + hash[1], 
+                            success: function(data) {
+                                var cookieName = 'spark_access_token';
+                                var cookieValue = data.access_token;
+                                var myDate = new Date();
+                                myDate.setMonth(myDate.getMonth() + 1);
+                                document.cookie = cookieName +"=" + cookieValue + ";domain=." + finesseDomain + ";path=/";
+                                window.close();
+                            }
+                        });
+                    }
+                }
+                return vars;
+            }
+        </script>
+    </head>
+
+    <body onLoad="getUrlVars()">
+        Authenticating...
+    </body>
+
+</html>
